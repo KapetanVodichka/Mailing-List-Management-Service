@@ -1,0 +1,20 @@
+{% extends 'mailing/base.html' %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+
+    <div style="display: flex; flex-direction: row;">
+        <div style="margin-right: 20px;">
+            {{ mailing_form.as_p }}
+            {{ mail_form.as_p }}
+        </div>
+
+        <div>
+            {{ client_form.as_p }}
+        </div>
+    </div>
+
+    <button type="submit">Создать рассылку</button>
+</form>
+{% endblock %}
