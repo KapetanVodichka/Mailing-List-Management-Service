@@ -1,0 +1,20 @@
+{% extends 'mailing/base.html' %}
+{% load mediapath %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            {% if object.preview %}
+            <img src="{% mediapath object.preview %}" class="card-img-top" alt="{{ object.title }}">
+            {% else %}
+            <p>Картинки нет, но вы держитесь</p>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h1>{{ object.title }}</h1>
+            <h5>Просмотров: {{ object.view_count }}</h5>
+            <p>{{ object.body }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

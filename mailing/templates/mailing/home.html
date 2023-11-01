@@ -1,0 +1,18 @@
+{% extends 'mailing/base.html' %}
+
+{% block content %}
+<div class="container">
+  <h1>Главная страница</h1>
+
+  <p>Количество рассылок всего: {{ total_mailings }}</p>
+  <p>Количество активных рассылок: {{ active_mailings }}</p>
+  <p>Количество уникальных клиентов для рассылок: {{ unique_clients }}</p>
+
+  <h2>Случайные статьи из блога:</h2>
+  <ul>
+    {% for article in random_articles %}
+    <li><a href="{% url 'blog:view' pk=article.pk %}">{{ article.title }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

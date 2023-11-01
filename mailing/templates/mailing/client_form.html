@@ -1,0 +1,14 @@
+{% extends 'mailing/base.html' %}
+
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+
+  <div style="display: flex; flex-direction: row;">
+    <div style="margin-right: 20px;">
+      {{ form.as_p }}
+    </div>
+  </div>
+  <button type="submit">создать клиента</button>
+</form>
+{% endblock %}
