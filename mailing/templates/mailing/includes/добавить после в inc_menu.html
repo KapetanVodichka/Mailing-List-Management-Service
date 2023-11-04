@@ -1,7 +1,0 @@
-{% if user.is_authenticated %}
-<h4 class="text-white" href="{% url 'users:profile' %}">Профиль</h4>
-<h4 class="text-white" href="{% url 'users:logout' %}">Выйти</h4>
-{% else %}
-<h4 class="text-white" href="{% url 'users:register' %}">Регистрация</h4>
-<h4 class="text-white" href="{% url 'users:login' %}">Войти</h4>
-{% endif %}

@@ -1,0 +1,13 @@
+{% extends 'mailing/base.html' %}
+
+{% block content %}
+<h2>Профиль пользователя</h2>
+<p>Имя: {{ user.first_name }}</p>
+<p>Фамилия: {{ user.last_name }}</p>
+<p>Email: {{ user.email }}</p>
+<p>Телефон: {{ user.phone }}</p>
+<p>Страна: {{ user.country }}</p>
+<!-- Добавляем кнопку для редактирования профиля -->
+<a href="{% url 'users:profile_edit' %}" class="btn btn-primary">Редактировать профиль</a>
+<a href="{% url 'users:profile_delete' user.pk %}" class="btn btn-primary">Удалить профиль (!)</a>
+{% endblock %}

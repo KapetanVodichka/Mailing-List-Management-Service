@@ -20,4 +20,4 @@ class MailAdmin(admin.ModelAdmin):
 
 @admin.register(Log)
 class LogAdmin(admin.ModelAdmin):
-    list_display = ('last_try_time', 'status', 'mail_server_callback')
+    list_display = ('last_mailing_datetime', 'status', 'mail_server_callback', 'mailing')

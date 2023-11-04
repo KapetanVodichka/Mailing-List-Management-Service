@@ -1,0 +1,20 @@
+{% extends 'mailing/base.html' %}
+{% block content %}
+<head>
+  <title>Завершенные рассылки</title>
+</head>
+<body>
+<h1>Завершенные рассылки</h1>
+<ul>
+  {% if mailings %}
+  {% for mailing in mailings %}
+  <li>
+    <a href="{% url 'mailing:mailing_detail' mailing.pk %}">{{ mailing }}</a>
+  </li>
+  {% endfor %}
+  {% else %}
+  <p>У вас еще нет завершенных рассылок</p>
+  {% endif %}
+</ul>
+</body>
+{% endblock %}

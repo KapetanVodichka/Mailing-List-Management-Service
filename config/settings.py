@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apscheduler',
     'django_apscheduler',
     'blog',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -112,7 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Yekaterinburg'
 
 USE_I18N = True
 
@@ -145,3 +146,9 @@ EMAIL_HOST_USER = 'catalog.course@mail.ru'
 EMAIL_HOST_PASSWORD = 'GMgxaGXPbPBHYaya9fvY'
 
 APPSCHEDULER_DATETIME_FORMAT = "H:i"
+
+APPSCHEDULER_STARTED = False
+
+AUTH_USER_MODEL = 'users.User'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

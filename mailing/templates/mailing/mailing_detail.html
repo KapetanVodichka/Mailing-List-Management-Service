@@ -1,0 +1,40 @@
+{% extends 'mailing/base.html' %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Детали рассылки</title>
+</head>
+<body>
+<h1>Детали рассылки</h1>
+<h2>{{ object }}</h2>
+<p><strong>Периодичность:</strong> {{ object.get_period_display }}</p>
+<p><strong>Время и дата начала рассылки:</strong> {{ object.starting_at }}</p>
+<p><strong>Время и дата окончания рассылки:</strong> {{ object.ending_at }}</p>
+<p><strong>Статус рассылки:</strong> {{ object.mailing_status }}</p>
+
+<h3>Связанное сообщение для рассылки:</h3>
+<p><strong>Тема сообщения:</strong> {{ object.mail.mail_theme }}</p>
+<p><strong>Сообщение:</strong></p>
+<p>{{ object.mail.mail_body }}</p>
+
+<h3>Список клиентов в этой рассылке:</h3>
+<ul>
+    {% for client in object.clients.all %}
+    <li>{{ client }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Логи рассылки:</h3>
+<ul>
+    {% for log in object.log_set.all %}
+    <li>
+        <strong>Дата и время последней отправки:</strong> {{ log.last_mailing_datetime }}
+        <strong>Статус попытки:</strong> {{ log.status }}
+        <strong>Ответ почтового сервера:</strong> {{ log.mail_server_callback }}
+    </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'mailing:mailing_list' %}">Назад к списку рассылок</a>
+</body>
+{% endblock %}

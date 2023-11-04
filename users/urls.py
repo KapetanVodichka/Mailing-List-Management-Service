@@ -1,15 +1,17 @@
+from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
-from .views import MailingListView, MailingDetailView, MailingCreateView, MailCreateView, \
-    ClientCreateView, MailingTemplateView, HomeView
 
-app_name = 'mailing'
+from .views import RegisterView, VerifyEmailView, ProfileDetailView, ProfileUpdateView, ProfileDeleteView
+
+app_name = 'users'
 
 urlpatterns = [
-    path('', HomeView.as_view(), name='home'),
-    path('mailing_list/', MailingListView.as_view(), name='mailing_list'),
-    path('mailing_detail/<int:pk>/', MailingDetailView.as_view(), name='mailing_detail'),
-    path('mailing_template/', MailingTemplateView.as_view(), name='mailing_template'),
-    path('mailing_create/', MailingCreateView.as_view(), name='mailing_create'),
-    path('mail_create/', MailCreateView.as_view(), name='mail_create'),
-    path('client_create/', ClientCreateView.as_view(), name='client_create'),
+    path('login/', LoginView.as_view(template_name='users/login.html'), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+    path('register/', RegisterView.as_view(), name='register'),
+    path('verify_email/<str:code>/', VerifyEmailView.as_view(), name='verify_email'),
+    path('profile/', ProfileDetailView.as_view(), name='profile'),
+    path('profile_edit/', ProfileUpdateView.as_view(), name='profile_edit'),
+    path('profile_delete/<int:pk>/', ProfileDeleteView.as_view(), name='profile_delete'),
+    # path('update-pass/', updatepassword, name='update_pass'),
 ]

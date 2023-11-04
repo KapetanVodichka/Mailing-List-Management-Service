@@ -1,12 +1,24 @@
+from apscheduler.schedulers.background import BackgroundScheduler
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.http import request
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, TemplateView, FormView
 from django.urls import reverse_lazy, reverse
+from django_apscheduler.jobstores import DjangoJobStore
 
 from blog.models import Blog
+from config.settings import APPSCHEDULER_STARTED, TIME_ZONE
 from .forms import MailingForm, MailForm, ClientForm
 from .models import Client, Mailing, Mail, Log
+
+
+if not APPSCHEDULER_STARTED:
+    scheduler = BackgroundScheduler(timezone=TIME_ZONE)
+    scheduler.add_jobstore(DjangoJobStore(), "default")
+    scheduler.start()
+    APPSCHEDULER_STARTED = True
 
 
 class HomeView(TemplateView):
@@ -35,45 +47,30 @@ class HomeView(TemplateView):
         return context
 
 
-class MailingTemplateView(FormView):
-    template_name = 'mailing/mailing_template.html'
-    form_class = MailingForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['mailing_form'] = MailingForm()
-        context['mail_form'] = MailForm()
-        context['client_form'] = ClientForm()
-        return context
-
-    @transaction.atomic
-    def form_valid(self, form):
-        # Создаем сообщение
-        mail = Mail.objects.create(
-            mail_theme=form.cleaned_data['mail_theme'],
-            mail_body=form.cleaned_data['mail_body']
-            # Дополните это соответствующими полями вашей формы
-        )
-
-        # Создаем рассылку и связываем с сообщением
-        mailing = Mailing.objects.create(mail=mail)
-        # Дополнительная логика для сохранения данных рассылки
-
-        return redirect('mailing:mailing_list')
-
-    def form_invalid(self, form):
-        # Обработка ошибок валидации формы
-        return self.render_to_response(self.get_context_data(form=form))
-
-
 # Представление для списка рассылок
-class MailingListView(ListView):
+class MailingListView(LoginRequiredMixin, ListView):
     model = Mailing
     template_name = 'mailing/mailing_list.html'
 
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
+
+
+class MailingOldListView(LoginRequiredMixin, ListView):
+    model = Mailing
+    template_name = 'mailing/mailing_list_old.html'
+
+    def get_queryset(self):
+        return Mailing.objects.filter(mailing_status='Завершена')
+
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
+
 
 # Представление для создания новой рассылки
-class MailingCreateView(CreateView):
+class MailingCreateView(LoginRequiredMixin, CreateView):
     model = Mailing
     form_class = MailingForm
     template_name = 'mailing/mailing_form.html'
@@ -96,69 +93,108 @@ class MailingCreateView(CreateView):
 
         return super().form_valid(form)
 
-
-class MailCreateView(CreateView):
-    model = Mail
-    form_class = MailForm
-    template_name = 'mailing/mail_form.html'
-
-    def get_success_url(self):
-        # При успешном создании сообщения, перенаправляем на страницу создания клиента
-        return reverse('mailing:client_create', kwargs={'pk': self.object.id})
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
 
 
 # Представление для создания клиента
-class ClientCreateView(CreateView):
+class ClientCreateView(LoginRequiredMixin, CreateView):
     model = Client
     form_class = ClientForm
     success_url = reverse_lazy('mailing:mailing_list')
     template_name = 'mailing/client_form.html'
 
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
+
 
 # Представление для обновления рассылки
-class MailingUpdateView(UpdateView):
+class MailingUpdateView(LoginRequiredMixin, UpdateView):
     model = Mailing
-    fields = ['period', 'mailing_time', 'mailing_status']
+    form_class = MailingForm
     template_name = 'mailing/mailing_form.html'
+
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
+
+    def get_success_url(self):
+        return reverse('mailing:mailing_list')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        mailing = self.object
+        if mailing.mail:
+            form.fields['mail_theme'].initial = mailing.mail.mail_theme
+            form.fields['mail_body'].initial = mailing.mail.mail_body
+        form.fields['starting_at'].initial = mailing.starting_at
+        form.fields['ending_at'].initial = mailing.ending_at
+        return form
 
 
 # Представление для удаления рассылки
-class MailingDeleteView(DeleteView):
+class MailingDeleteView(LoginRequiredMixin, DeleteView):
     model = Mailing
     template_name = 'mailing/mailing_confirm_delete.html'
-    success_url = reverse_lazy('mailing_list.html')
+    success_url = reverse_lazy('mailing:mailing_list')
+
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
 
 
 # Представление для деталей рассылки
-class MailingDetailView(DetailView):
+class MailingDetailView(LoginRequiredMixin, DetailView):
     model = Mailing
     template_name = 'mailing/mailing_detail.html'
 
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
+
 
 # Представление для списка клиентов
-class ClientListView(ListView):
+class ClientListView(LoginRequiredMixin, ListView):
     model = Client
     template_name = 'mailing/client_list.html'
 
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
+
 
 # Представление для деталей клиента
-class ClientDetailView(DetailView):
+class ClientDetailView(LoginRequiredMixin, DetailView):
     model = Client
     template_name = 'mailing/client_detail.html'
 
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
+
 
 # Представление для редактирования клиента
-class ClientUpdateView(UpdateView):
+class ClientUpdateView(LoginRequiredMixin, UpdateView):
     model = Client
     fields = ['first_name', 'last_name', 'patronymic', 'email', 'comment']
     template_name = 'mailing/client_form.html'
-    success_url = reverse_lazy('client_list')
+    success_url = reverse_lazy('users:client_list')
+
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
 
 
 # Представление для удаления клиента
-class ClientDeleteView(DeleteView):
+class ClientDeleteView(LoginRequiredMixin, DeleteView):
     model = Client
-    success_url = reverse_lazy('client_list')
+    success_url = reverse_lazy('users:client_list')
     template_name = 'mailing/client_confirm_delete.html'
+
+    def get_queryset(self):
+        user = self.request.user
+        return Mailing.objects.filter(user=user)
 
 

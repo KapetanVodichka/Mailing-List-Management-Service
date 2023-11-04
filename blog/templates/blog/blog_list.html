@@ -4,7 +4,9 @@
 <main role="main">
 
     <div class="album py-5 bg-light">
+        {% if user.is_manager %}
         <a class="btn btn-outline-primary p-3" href="{% url 'blog:create' %}">Добавить блог</a>
+        {% endif %}
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
@@ -19,10 +21,14 @@
                                 <div class="btn-group">
                                     <a class="btn btn-sm btn-outline-secondary"
                                        href="#">View</a>
+                                    {% if perms.user.is_manager %}
                                     <a class="btn btn-sm btn-outline-secondary"
                                        href="#">Edit</a>
+                                    {% endif %}
+                                    {% if perms.user.is_manager %}
                                     <a class="btn btn-sm btn-outline-secondary"
                                        href="#">Delete</a>
+                                    {% endif %}
                                 </div>
                                 <small class="text-muted">9 mins</small>
                             </div>
@@ -42,12 +48,15 @@
                                 <div class="btn-group">
                                     <a class="btn btn-sm btn-outline-secondary"
                                        href="{% url 'blog:view' pk=object.pk %}">View</a>
+                                    {% if user.is_manager %}
                                     <a class="btn btn-sm btn-outline-secondary"
                                        href="{% url 'blog:edit' pk=object.pk %}">Edit</a>
+                                    {% endif %}
+                                    {% if perms.user.is_manager %}
                                     <a class="btn btn-sm btn-outline-secondary"
                                        href="{% url 'blog:delete' pk=object.pk %}">Delete</a>
+                                    {% endif %}
                                 </div>
-                                <small class="text-muted">9 mins</small>
                             </div>
                         </div>
                     </div>

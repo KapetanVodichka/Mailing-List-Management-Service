@@ -1,0 +1,31 @@
+{% extends 'mailing/base.html' %}
+
+{% block content %}
+<head>
+    <title>Список клиентов</title>
+</head>
+<body>
+<h1>Список клиентов</h1>
+<table>
+    <tr>
+        <th>Имя</th>
+        <th>Фамилия</th>
+        <th>Отчество</th>
+        <th>Email</th>
+
+    </tr>
+    {% for client in object_list %}
+    <tr>
+        <td>{{ client.first_name }}</td>
+        <td>{{ client.last_name }}</td>
+        <td>{{ client.patronymic }}</td>
+        <td>{{ client.email }}</td>
+        <td>
+            <a href="{% url 'mailing:client_edit' client.pk %}">Edit</a>
+            <a href="{% url 'mailing:client_delete' client.pk %}">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+</body>
+{% endblock %}

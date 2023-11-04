@@ -1,0 +1,12 @@
+{% extends 'mailing/base.html' %}
+
+{% block content %}
+<h2>Редактировать профиль</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+</form>
+<br>
+<a href="{% url 'users:profile' %}" class="btn btn-secondary">Отмена</a>
+{% endblock %}

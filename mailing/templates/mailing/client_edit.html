@@ -1,0 +1,17 @@
+{% extends 'mailing/base.html' %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Редактирование клиента</title>
+</head>
+<body>
+<h1>Редактирование клиента</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Сохранить изменения</button>
+</form>
+<a href="{% url 'mailing:client_list' %}">Назад к списку клиентов</a>
+</body>
+{% endblock %}

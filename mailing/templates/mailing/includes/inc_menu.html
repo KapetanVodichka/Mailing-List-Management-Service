@@ -9,10 +9,18 @@
             Then, link them off to some social networking sites or contact information.</p>
         </div>
         <div class="col-sm-4 offset-md-1 py-4">
-
+          {% if user.is_authenticated %}
+          <h4 class="text-white"><a href="{% url 'users:profile' %}">Профиль</a></h4>
+          <h4 class="text-white"><a href="{% url 'users:logout' %}">Выйти</a></h4>
+          {% else %}
+          <h4 class="text-white"><a href="{% url 'users:register' %}">Регистрация</a></h4>
+          <h4 class="text-white"><a href="{% url 'users:login' %}">Войти</a></h4>
+          {% endif %}
           <ul class="list-unstyled">
             <li><a href="{% url 'mailing:home' %}" class="text-white">Главная</a></li>
-            <li><a href="{% url 'mailing:mailing_list' %}" class="text-white">Список рассылок</a></li>
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'mailing:mailing_list' %}" class="text-white">Рассылки</a></li>
+            {% endif %}
             <li><a href="{% url 'blog:list' %}" class="text-white">Блог</a></li>
             <li><a href="#" class="text-white">Email me</a></li>
           </ul>

@@ -1,4 +1,6 @@
 from django import forms
+from django.forms import DateTimeInput
+
 from .models import Mailing, Mail, Client
 
 
@@ -15,15 +17,14 @@ class ClientForm(forms.ModelForm):
 
 
 class MailingForm(forms.ModelForm):
-    # Поля для темы сообщения и его тела
     mail_theme = forms.CharField(max_length=150, label='Тема', required=False)
     mail_body = forms.CharField(widget=forms.Textarea, label='Тело сообщения', required=False)
 
     class Meta:
         model = Mailing
-        fields = ['period', 'starting_at', 'ending_at', 'clients']  # Добавляем поле 'mail'
+        fields = ['period', 'starting_at', 'ending_at', 'clients']
 
         widgets = {
-            'starting_at': forms.TimeInput(attrs={'type': 'time'}),
-            'ending_at': forms.TimeInput(attrs={'type': 'time'}),
+            'starting_at': DateTimeInput(attrs={'type': 'datetime-local'}),
+            'ending_at': DateTimeInput(attrs={'type': 'datetime-local'}),
         }

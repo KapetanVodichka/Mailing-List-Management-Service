@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.models import User
+
 NULLABLE = {'blank': True, 'null': True}
 
 
@@ -38,12 +40,16 @@ class Mailing(models.Model):
     ]
 
     period = models.CharField(max_length=10, choices=period_choice, verbose_name='Периодичность')
-    # mailing_time = models.TimeField(auto_now_add=True, verbose_name='Время рассылки')
-    starting_at = models.TimeField(verbose_name='время начала рассылки')
-    ending_at = models.TimeField(verbose_name='время окончания рассылки')
+    starting_at = models.DateTimeField(verbose_name='время и дата начала рассылки')
+    ending_at = models.DateTimeField(verbose_name='время и дата окончания рассылки')
+    last_mailing_datetime = models.DateTimeField(auto_now_add=True, verbose_name='время и дата последней рассылки',
+                                                 null=True, blank=True)
+    next_mailing_datetime = models.DateTimeField(auto_now_add=True, verbose_name='время и дата следующей рассылки',
+                                                 null=True, blank=True)
     mailing_status = models.CharField(max_length=20, verbose_name='Статус рассылки', default='Создана')
     mail = models.ForeignKey(Mail, on_delete=models.SET_NULL, null=True, blank=True)
     clients = models.ManyToManyField(Client)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'Рассылка с {self.starting_at} по {self.ending_at}'
@@ -54,13 +60,20 @@ class Mailing(models.Model):
 
 
 class Log(models.Model):
-    last_try_time = models.DateTimeField(verbose_name='Дата и время последней рассылки')
+    last_mailing_datetime = models.DateTimeField(auto_now_add=True, verbose_name='время и дата последней рассылки',
+                                                 null=True, blank=True)
     status = models.CharField(max_length=20, verbose_name='Статус попытки')
     mail_server_callback = models.TextField(verbose_name='Ответ почтового сервера, если он был')
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'Лог - {self.status}'
+
+    def save(self, *args, **kwargs):
+        if self.mailing:
+            # Копировать last_mailing_datetime из связанной рассылки Mailing
+            self.last_mailing_datetime = self.mailing.last_mailing_datetime
+        super(Log, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Лог рассылки'
