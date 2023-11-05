@@ -1,18 +1,15 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
-from django.http import request
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views import View
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, TemplateView, FormView
+from django.core.cache import cache
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, TemplateView
 from django.urls import reverse_lazy, reverse
 from django_apscheduler.jobstores import DjangoJobStore
 
 from blog.models import Blog
 from blog.permissions import UserMixin
-from config.settings import TIME_ZONE
-from .forms import MailingForm, MailForm, ClientForm
-from .models import Client, Mailing, Mail, Log
+from config.settings import TIME_ZONE, CACHE_ENABLED
+from .forms import MailingForm, ClientForm
+from .models import Client, Mailing, Mail
 
 scheduler = BackgroundScheduler(timezone=TIME_ZONE)
 scheduler.add_jobstore(DjangoJobStore(), "default")
@@ -20,6 +17,9 @@ scheduler.start()
 
 
 class HomeView(TemplateView):
+    """
+        Главная страница
+        """
     template_name = 'mailing/home.html'
 
     def get_context_data(self, **kwargs):
@@ -54,10 +54,23 @@ class MailingListView(LoginRequiredMixin, UserMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        return Mailing.objects.filter(user=user)
+        # return Mailing.objects.filter(user=user)
+
+        if CACHE_ENABLED:
+            key = f'mailing_list_{user.id}'
+            mailing_list = cache.get(key)
+            if mailing_list is None:
+                mailing_list = Mailing.objects.filter(user=user)
+                cache.set(key, mailing_list)
+        else:
+            mailing_list = Mailing.objects.filter(user=user)
+        return mailing_list
 
 
-class MailingOldListView(LoginRequiredMixin, ListView):
+class MailingOldListView(LoginRequiredMixin, UserMixin, ListView):
+    """
+        Представление для списка архивных рассылок
+        """
     model = Mailing
     template_name = 'mailing/mailing_list_old.html'
 
@@ -67,7 +80,10 @@ class MailingOldListView(LoginRequiredMixin, ListView):
 
 
 # Представление для создания новой рассылки
-class MailingCreateView(LoginRequiredMixin, CreateView):
+class MailingCreateView(LoginRequiredMixin, UserMixin, CreateView):
+    """
+        Представление для создания рассылки
+        """
     model = Mailing
     form_class = MailingForm
     template_name = 'mailing/mailing_form.html'
@@ -97,8 +113,10 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         return Mailing.objects.filter(user=user)
 
 
-# Представление для создания клиента
 class ClientCreateView(LoginRequiredMixin, CreateView):
+    """
+        Представление для создания клиента
+        """
     model = Client
     form_class = ClientForm
     success_url = reverse_lazy('mailing:mailing_list')
@@ -109,8 +127,10 @@ class ClientCreateView(LoginRequiredMixin, CreateView):
         return Mailing.objects.filter(user=user)
 
 
-# Представление для обновления рассылки
-class MailingUpdateView(LoginRequiredMixin, UpdateView):
+class MailingUpdateView(LoginRequiredMixin, UserMixin, UpdateView):
+    """
+        Представление для изменения существующей рассылки
+        """
     model = Mailing
     form_class = MailingForm
     template_name = 'mailing/mailing_form.html'
@@ -133,8 +153,10 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
         return form
 
 
-# Представление для удаления рассылки
 class MailingDeleteView(LoginRequiredMixin, DeleteView):
+    """
+        Представление для удаления рассылки
+        """
     model = Mailing
     template_name = 'mailing/mailing_confirm_delete.html'
     success_url = reverse_lazy('mailing:mailing_list')
@@ -144,8 +166,10 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
         return Mailing.objects.filter(user=user)
 
 
-# Представление для деталей рассылки
 class MailingDetailView(LoginRequiredMixin, DetailView):
+    """
+        Представление для деталей рассылки
+        """
     model = Mailing
     template_name = 'mailing/mailing_detail.html'
 
@@ -154,8 +178,10 @@ class MailingDetailView(LoginRequiredMixin, DetailView):
         return Mailing.objects.filter(user=user)
 
 
-# Представление для списка клиентов
 class ClientListView(LoginRequiredMixin, ListView):
+    """
+    Представление для списка клиентов
+    """
     model = Client
     template_name = 'mailing/client_list.html'
 
@@ -164,8 +190,10 @@ class ClientListView(LoginRequiredMixin, ListView):
         return Mailing.objects.filter(user=user)
 
 
-# Представление для деталей клиента
 class ClientDetailView(LoginRequiredMixin, DetailView):
+    """
+    Представление для деталей клиента
+    """
     model = Client
     template_name = 'mailing/client_detail.html'
 
@@ -174,8 +202,10 @@ class ClientDetailView(LoginRequiredMixin, DetailView):
         return Mailing.objects.filter(user=user)
 
 
-# Представление для редактирования клиента
 class ClientUpdateView(LoginRequiredMixin, UpdateView):
+    """
+    Представление для редактирования клиента
+    """
     model = Client
     fields = ['first_name', 'last_name', 'patronymic', 'email', 'comment']
     template_name = 'mailing/client_form.html'
@@ -186,8 +216,10 @@ class ClientUpdateView(LoginRequiredMixin, UpdateView):
         return Mailing.objects.filter(user=user)
 
 
-# Представление для удаления клиента
 class ClientDeleteView(LoginRequiredMixin, DeleteView):
+    """
+    Представление для удаления клиента
+    """
     model = Client
     success_url = reverse_lazy('users:client_list')
     template_name = 'mailing/client_confirm_delete.html'

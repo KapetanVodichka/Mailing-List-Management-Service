@@ -1,11 +1,9 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
-from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 import random
@@ -66,7 +64,6 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'user'
 
     def get_object(self, queryset=None):
-        # Возвращает объект пользователя, который будет отображаться в профиле
         return self.request.user
 
 
@@ -89,46 +86,3 @@ class ProfileDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_object(self, queryset=None):
         return self.request.user
-
-
-# class UpdatePassView(View):
-#     template_name = 'users/update_pass.html'
-#
-#     def get(self, request):
-#         return render(request, self.template_name)
-#
-#     def post(self, request):
-#         email = request.POST.get('email')
-#         try:
-#             user = User.objects.get(email=email)
-#             new_pass = ''.join(random.sample(symbols, length))
-#             user.set_password(new_pass)
-#             user.save()
-#
-#             send_mail(
-#                 'Ваш новый пароль',
-#                 f'Пароль забыли, хоть с нового кайфуйте: {new_pass}',
-#                 'catalog.course@mail.ru',
-#                 [user.email]
-#             )
-#
-#             return HttpResponseRedirect(reverse('users:login'))
-#         except User.DoesNotExist:
-#             return render(request, self.template_name, {'error': 'Пользователь с таким email не найден.'})
-
-
-# def updatepassword(request):
-#     if request.user.is_authenticated:
-#         new_pass = ''.join(random.sample(symbols, length))
-#         request.user.set_password(new_pass)
-#         request.user.save()
-#
-#         send_mail(
-#             'Ваш новый пароль',
-#             f'Ваш новый пароль: {new_pass}',
-#             'catalog.course@mail.ru',
-#             [request.user.email]
-#         )
-#         return redirect(reverse_lazy('users:update_pass'))
-#     else:
-#         return redirect('users:login')

@@ -1,23 +1,21 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 
 from blog.models import Blog
+from blog.permissions import ManagerMixin
 
 
 class BlogListView(ListView):
     model = Blog
 
 
-class BlogCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class BlogCreateView(LoginRequiredMixin, ManagerMixin, CreateView):
     model = Blog
     fields = ('title', 'body', 'preview',)
 
     def get_success_url(self):
         return reverse('blog:view', args=[self.object.pk])
-
-    def test_func(self):
-        return self.request.user.is_manager
 
 
 class BlogDetailView(DetailView):
@@ -30,20 +28,14 @@ class BlogDetailView(DetailView):
         return self.object
 
 
-class BlogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class BlogUpdateView(LoginRequiredMixin, ManagerMixin, UpdateView):
     model = Blog
     fields = ('title', 'body', 'preview',)
 
     def get_success_url(self):
         return reverse('blog:view', args=[self.object.pk])
 
-    def test_func(self):
-        return self.request.user.is_manager
 
-
-class BlogDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class BlogDeleteView(LoginRequiredMixin, ManagerMixin, DeleteView):
     model = Blog
     success_url = reverse_lazy('blog:list')
-
-    def test_func(self):
-        return self.request.user.is_manager

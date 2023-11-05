@@ -1,13 +1,7 @@
 from django import forms
 from django.forms import DateTimeInput
 
-from .models import Mailing, Mail, Client
-
-
-class MailForm(forms.ModelForm):
-    class Meta:
-        model = Mail
-        fields = ['mail_theme', 'mail_body']
+from .models import Mailing, Client
 
 
 class ClientForm(forms.ModelForm):

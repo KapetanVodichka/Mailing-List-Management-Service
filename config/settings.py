@@ -136,7 +136,15 @@ EMAIL_HOST_PASSWORD = 'GMgxaGXPbPBHYaya9fvY'
 
 APPSCHEDULER_DATETIME_FORMAT = "H:i"
 
+CACHE_ENABLED = True
 
+if CACHE_ENABLED:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": "redis://127.0.0.1:6379",
+        }
+    }
 
 AUTH_USER_MODEL = 'users.User'
 LOGIN_REDIRECT_URL = '/'

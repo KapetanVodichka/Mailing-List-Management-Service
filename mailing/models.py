@@ -71,7 +71,6 @@ class Log(models.Model):
 
     def save(self, *args, **kwargs):
         if self.mailing:
-            # Копировать last_mailing_datetime из связанной рассылки Mailing
             self.last_mailing_datetime = self.mailing.last_mailing_datetime
         super(Log, self).save(*args, **kwargs)
 
