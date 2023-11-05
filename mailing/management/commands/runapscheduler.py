@@ -10,6 +10,7 @@ from django_apscheduler import util
 from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
 
+from blog.models import Blog
 from config.settings import EMAIL_HOST_USER
 from mailing.models import Mailing, Log
 
@@ -199,6 +200,7 @@ class Command(BaseCommand):
     help = "Запускает APScheduler."
 
     def handle(self, *args, **options):
+
         scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
         scheduler.add_jobstore(DjangoJobStore(), "default")
 
@@ -229,9 +231,11 @@ class Command(BaseCommand):
         )
         print("Добавлена задача 'monthly_mailing'.")
 
+
         try:
             print("Запуск планировщика...")
             scheduler.start()
+
         except KeyboardInterrupt:
             print("Остановка планировщика...")
             scheduler.shutdown()

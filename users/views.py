@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -30,7 +30,7 @@ class RegisterView(CreateView):
     success_url = reverse_lazy('users:login')
 
     def form_valid(self, form):
-        form_users = super().form_valid(form)
+        super().form_valid(form)
         code = ''.join(random.sample(symbols, length))
         self.object.code = code
         self.object.save()
@@ -54,7 +54,7 @@ class VerifyEmailView(View):
     success_url = reverse_lazy('users:login')
 
     def get(self, request, code):
-        user = User.objects.get(code=code)
+        user = get_object_or_404(User, code=code)
         user.is_active = True
         user.save()
         return redirect('users:login')

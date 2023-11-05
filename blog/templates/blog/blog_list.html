@@ -52,7 +52,7 @@
                                     <a class="btn btn-sm btn-outline-secondary"
                                        href="{% url 'blog:edit' pk=object.pk %}">Edit</a>
                                     {% endif %}
-                                    {% if perms.user.is_manager %}
+                                    {% if user.is_manager %}
                                     <a class="btn btn-sm btn-outline-secondary"
                                        href="{% url 'blog:delete' pk=object.pk %}">Delete</a>
                                     {% endif %}

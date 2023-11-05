@@ -33,7 +33,6 @@ class BlogDetailView(DetailView):
 class BlogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Blog
     fields = ('title', 'body', 'preview',)
-    permission_required = 'blog.edit_blog'
 
     def get_success_url(self):
         return reverse('blog:view', args=[self.object.pk])
@@ -44,7 +43,6 @@ class BlogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 class BlogDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Blog
-    permission_required = 'blog.delete_blog'
     success_url = reverse_lazy('blog:list')
 
     def test_func(self):

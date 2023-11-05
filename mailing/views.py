@@ -9,16 +9,14 @@ from django.urls import reverse_lazy, reverse
 from django_apscheduler.jobstores import DjangoJobStore
 
 from blog.models import Blog
-from config.settings import APPSCHEDULER_STARTED, TIME_ZONE
+from blog.permissions import UserMixin
+from config.settings import TIME_ZONE
 from .forms import MailingForm, MailForm, ClientForm
 from .models import Client, Mailing, Mail, Log
 
-
-if not APPSCHEDULER_STARTED:
-    scheduler = BackgroundScheduler(timezone=TIME_ZONE)
-    scheduler.add_jobstore(DjangoJobStore(), "default")
-    scheduler.start()
-    APPSCHEDULER_STARTED = True
+scheduler = BackgroundScheduler(timezone=TIME_ZONE)
+scheduler.add_jobstore(DjangoJobStore(), "default")
+scheduler.start()
 
 
 class HomeView(TemplateView):
@@ -47,8 +45,10 @@ class HomeView(TemplateView):
         return context
 
 
-# Представление для списка рассылок
-class MailingListView(LoginRequiredMixin, ListView):
+class MailingListView(LoginRequiredMixin, UserMixin, ListView):
+    """
+    Представление для списка рассылок
+    """
     model = Mailing
     template_name = 'mailing/mailing_list.html'
 
@@ -62,11 +62,8 @@ class MailingOldListView(LoginRequiredMixin, ListView):
     template_name = 'mailing/mailing_list_old.html'
 
     def get_queryset(self):
-        return Mailing.objects.filter(mailing_status='Завершена')
-
-    def get_queryset(self):
         user = self.request.user
-        return Mailing.objects.filter(user=user)
+        return Mailing.objects.filter(mailing_status='Завершена', user=user)
 
 
 # Представление для создания новой рассылки
@@ -89,6 +86,8 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         # Сохраняем рассылку и связываем её с созданным сообщением
         mailing = form.save(commit=False)
         mailing.mail = mail
+        mailing.user = self.request.user
+
         mailing.save()
 
         return super().form_valid(form)

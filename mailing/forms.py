@@ -22,7 +22,7 @@ class MailingForm(forms.ModelForm):
 
     class Meta:
         model = Mailing
-        fields = ['period', 'starting_at', 'ending_at', 'clients']
+        fields = ['period', 'starting_at', 'ending_at', 'clients', ]
 
         widgets = {
             'starting_at': DateTimeInput(attrs={'type': 'datetime-local'}),
