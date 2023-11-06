@@ -227,5 +227,3 @@ class ClientDeleteView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         user = self.request.user
         return Mailing.objects.filter(user=user)
-
-

@@ -10,7 +10,6 @@ from django_apscheduler import util
 from django_apscheduler.jobstores import DjangoJobStore
 from django_apscheduler.models import DjangoJobExecution
 
-from blog.models import Blog
 from config.settings import EMAIL_HOST_USER
 from mailing.models import Mailing, Log
 
@@ -230,7 +229,6 @@ class Command(BaseCommand):
             replace_existing=True,
         )
         print("Добавлена задача 'monthly_mailing'.")
-
 
         try:
             print("Запуск планировщика...")
